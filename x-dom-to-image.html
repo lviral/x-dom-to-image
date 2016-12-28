@@ -1,0 +1,47 @@
+<link rel="import" href="../polymer/polymer.html">
+<script  src="../dom-to-image/dist/dom-to-image.min.js"></script>
+<!--
+    `x-html-to-canvas`
+    Convert DOM HTML element to image
+    
+    @demo demo/index.html 
+    -->
+<dom-module id="x-dom-to-image">
+    <script>
+        Polymer({
+        
+          is: 'x-dom-to-image',
+          properties: {
+              dataUrl: {
+                  type: String,
+                  notify: true
+              },
+              width: Number,
+              height: Number
+          },
+          _convert: function(domElem) {
+              var width = this.width,
+                  height = this.height
+              const promise = new Promise(function(resolve, reject) {
+                  domtoimage.toPng(domElem).then((dataUrl)=> {
+                      var img = new Image();
+                      img.onload = function() {
+                          var canvas = document.createElement("canvas");
+                          canvas.width = width;
+                          canvas.height = height;
+                          canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+                          resolve(canvas.toDataURL());
+                        }
+                      img.src = dataUrl;
+                  }).catch(function(error) {
+                      reject(error);
+                  });
+              });
+              
+              promise.then((res)=>{
+                  this.dataUrl = res;
+              });
+          }
+        });
+    </script>
+</dom-module>
